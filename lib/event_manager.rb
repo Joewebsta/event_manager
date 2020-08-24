@@ -10,6 +10,18 @@ def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
 end
 
+def clean_telephone(telephone)
+  phone_num = telephone.gsub(/[^\d]/, '')
+
+  if phone_num.length < 10 || phone_num.length > 11
+    phone_num = ''
+  elsif phone_num.length == 11 && phone_num.start_with?('1')
+    phone_num = phone_num[1..11]
+  end
+
+  puts phone_num.empty? ? '' : phone_num.insert(7, '-').insert(3, '-')
+end
+
 def legislators_by_zipcode(zipcode)
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
   civic_info.key = 'AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw'
@@ -40,12 +52,13 @@ def create_personal_letter
   erb_template = ERB.new template_letter
 
   contents.each do |row|
-    id = row[0]
-    name = row[:first_name]
-    zipcode = clean_zipcode(row[:zipcode])
-    legislators = legislators_by_zipcode(zipcode)
-    form_letter = erb_template.result(binding)
-    save_thank_you_letter(id, form_letter)
+    clean_telephone(row[:home_phone])
+    # id = row[0]
+    # name = row[:first_name]
+    # zipcode = clean_zipcode(row[:zipcode])
+    # legislators = legislators_by_zipcode(zipcode)
+    # form_letter = erb_template.result(binding)
+    # save_thank_you_letter(id, form_letter)
   end
 end
 
